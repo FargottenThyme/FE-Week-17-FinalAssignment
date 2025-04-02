@@ -1,73 +1,96 @@
 import { useEffect, useState } from "react"
-import formatDate from "./formatDate"
 import ExpiredProduct from "./InvWatchComp/ExpiredProduct"
 import WatchList from "./InvWatchComp/WatchList"
-import sortData from "./sortData"
-import type { CInvent, Inventory, Product } from "./types"
+import type { Inventory, Item, Product } from "./types"
 
 export default function InvWatchlist() {
-    const d = new Date().toISOString()
-    const todayDate = formatDate(d.slice(0, 10))
 
-    const [products, setProducts] = useState<Product[]>([])
-    const [inventory, setInventory] = useState<Inventory[]>([])
+    // Sets the current date
+    const today = new Date();
+    const getDateFormat = (d: Date) => {
+        const x = d.toISOString();
+        const y = x.slice(0, 10);
+        return y;
+    }
+    const now = getDateFormat(today)
 
-    const [loading, setLoading] = useState(false)
+    // State objects
+    const [productData, setProductData] = useState<Product[]>([])
+    const [inventoryData, setInventoryData] = useState<Inventory[]>([])
+    const [itemData, setItemData] = useState<Item[]>([])
+    const [selectedDate, setSelectedDate] = useState(now)
+
+    const [isLoading, setIsLoading] = useState(false)
     const [errorMessage, setErrorMessage] = useState("")
 
-
-    useEffect(() => {
-        const fetchInventory = async () => {
-            setLoading(true)
-            try {
-                const response = await fetch("http://localhost:3000/inventory")
-                if (!response.ok) {
-                    setErrorMessage(response.statusText)
-                } else {
-                    const data = await response.json()
-                    setInventory(data)
-                }
-            } catch (error: any) {
-                setErrorMessage(error.message)
-            }
-            setLoading(false)
-        }
-        fetchInventory()
-
+    // UseEffects and Arrow Functions
+    useEffect(() => { // fetches the Product Data set
         const fetchProduct = async () => {
-            setLoading(true)
             try {
 
-                const response = await fetch("http://localhost:3000/product")
+                const response = await fetch("http://localhost:3000/product");
                 if (!response.ok) {
-                    setErrorMessage(response.statusText)
+                    setErrorMessage(response.statusText);
                 } else {
-                    const data = await response.json()
-                    setProducts(data)
+                    const data = await response.json();
+                    setProductData(data);
+                    console.log(data)
                 }
             } catch (error: any) {
-                setErrorMessage(error.message)
+                setErrorMessage(error.message);
             }
-            setLoading(false)
+            // setIsLoading(false)
         }
-        fetchProduct()
+        fetchProduct();
+    }, []);
+
+    useEffect(() => { // fetches the Inventory Data set, when do update is changed
+        const fetchInventory = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/inventory");
+                if (!response.ok) {
+                    setErrorMessage(response.statusText);
+                } else {
+                    const data = await response.json();
+                    setInventoryData(data);
+                    console.log(data)
+                }
+            } catch (error: any) {
+                setErrorMessage(error.message);
+            }
+            // setIsLoading(false);
+        }
+        fetchInventory();
     }, [])
 
-    const cInventory: CInvent[] = inventory.map((item: Inventory) => {
-        const newItem: CInvent = {
-            id: item.id,
-            productId: item.productId,
-            name: products[item.productId]?.name,
-            brand: products[item.productId]?.brand,
-            size: products[item.productId]?.size_oz,
-            price: products[item.productId]?.price,
-            receivedDate: formatDate(item.receivedDate),
-            expireDate: formatDate(item.expireDate)
+    useEffect(() => { // If error message changes, logs to the console.
+        if (errorMessage !== "") {
+            console.log(errorMessage);
         }
-        return newItem
-    })
+    }, [errorMessage]);
 
-    sortData(cInventory, "Expires")
+    useEffect(() => {
+        if (inventoryData !== undefined && productData !== undefined) {
+            setIsLoading(true)
+            const data = inventoryData.map((i) => {
+                const item = {
+                    id: i.id,
+                    productId: i.productId,
+                    name: productData[i.productId]?.name,
+                    brand: productData[i.productId]?.brand,
+                    size: productData[i.productId]?.size_oz,
+                    price: productData[i.productId]?.price,
+                    receivedDate: i.receivedDate,
+                    expireDate: i.expireDate
+                }
+                return item
+            })
+            console.log(data)
+            setItemData(data);
+            setIsLoading(false);
+        }
+    }, [inventoryData, selectedDate])
+
 
     return (
         <>
@@ -78,7 +101,9 @@ export default function InvWatchlist() {
                     </div>
                     <div className="card-body bg-secondary"
                         style={{ height: '100vh', overflow: 'auto' }} >
-                        {loading ? <h3 className="text-white text-center">Loading...</h3> :
+                        <label className="text-center text-white h5 me-2">Select Expiration Date to Compare:</label>
+                        <input type="date" id="selectDate" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+                        {isLoading ? <h3 className="text-white text-center">Loading...</h3> :
                             <>
                                 <table className="table table-striped table-dark table-responsive table-bordered" id="invTable">
                                     <thead>
@@ -93,7 +118,7 @@ export default function InvWatchlist() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <WatchList cInventory={cInventory} loading={loading} selectedDate={todayDate} />
+                                        <WatchList itemData={itemData} isLoading={isLoading} selectedDate={selectedDate} />
                                     </tbody>
                                 </table>
                                 <br />
@@ -114,7 +139,7 @@ export default function InvWatchlist() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <ExpiredProduct cInventory={cInventory} loading={loading} selectedDate={todayDate} />
+                                        <ExpiredProduct itemData={itemData} isLoading={isLoading} selectedDate={selectedDate} />
                                     </tbody>
                                 </table>
                             </>

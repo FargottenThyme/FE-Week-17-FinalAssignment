@@ -12,7 +12,7 @@ import type { Inventory, Item, Product } from "./types"
 // Loads the Table and button panel data
 export default function InvTable() {
 
-    // Constants and non-state objects
+    // Sets the current date
     const today = new Date();
     const getDateFormat = (d: Date) => {
         const x = d.toISOString();
@@ -20,6 +20,7 @@ export default function InvTable() {
         return y;
     }
     const now = getDateFormat(today)
+
     // State objects
     const [inventoryData, setInventoryData] = useState<Inventory[]>([]);
     const [productData, setProductData] = useState<Product[]>([]);
@@ -83,7 +84,7 @@ export default function InvTable() {
     }, [errorMessage]);
 
     useEffect(() => {
-        if (inventoryData !== undefined || productData !== undefined) {
+        if (inventoryData !== undefined && productData !== undefined) {
             setIsLoading(true)
             const data = inventoryData.map((i) => {
                 const item = {
@@ -103,22 +104,18 @@ export default function InvTable() {
         }
     }, [inventoryData])
 
+    
+
     const resetUpdater = () => {
+        setSelectedProduct("---")
+        setSelectedReceive(now)
+        setSelectedExpire(now)
         setIsDisabled(true)
         setItemId(-1)
     }
 
     // tempItemInfo declaration and clarification
-    let tempItemInfo: Item = { id: -1, productId: -1, name: "", brand: "", size: -1, price: -1, receivedDate: "", expireDate: "" }
-    if (tempItemInfo.id === -1 && itemData !== undefined && itemId !== -1) {
-        tempItemInfo = itemData[itemId];
-    }
-
-    // Placeholder and Default vars
-    const defaultProduct = ((tempItemInfo.name === "") ? "---" : tempItemInfo.name);
-    const defaultProductDisplay = ((defaultProduct === "---") ? "---" : `Current: ${defaultProduct}`)
-    const defaultReceive = ((tempItemInfo.receivedDate === "") ? now : tempItemInfo.receivedDate);
-    const defaultExpire = ((tempItemInfo.expireDate === "") ? now : tempItemInfo.expireDate);
+    const currentProduct = ((selectedProduct === "---") ? "---" : `Current: ${selectedProduct}`)
     const findProductId = () => {
         const x = ((selectedProduct === "---") ? undefined : productData.find((product) => product.name === selectedProduct))
         const y = x?.id
@@ -130,14 +127,11 @@ export default function InvTable() {
     }
 
     // Form select and input data
-    const [formData, setFormData] = useState<Inventory>({ id: -1, productId: -1, receivedDate: now, expireDate: now })
+    const formData: Inventory = { id: itemId, productId: findProductId(), receivedDate: selectedReceive, expireDate: selectedExpire }
 
     useEffect(() => {
-        if (itemId !== -1) {
-            setFormData({ id: itemId, productId: findProductId(), receivedDate: selectedReceive, expireDate: selectedExpire });
-        }
-    }, [itemId])
-
+        console.log(formData);
+    }, [formData])
 
 
 
@@ -195,9 +189,9 @@ export default function InvTable() {
                                         <div className="col mx-3 pb-4">
                                             <div className="form-group">
                                                 <label className="me-2">Product to Change:</label>
-                                                <select className="form-control text-secondary text-center" defaultValue={defaultProduct} id="productSelect"
+                                                <select className="form-control text-secondary text-center" value={selectedProduct} id="productSelect"
                                                     onChange={(e) => setSelectedProduct(e.target.value)} disabled={isDisabled} >
-                                                    <option id="placeholder" value={defaultProduct} >{defaultProductDisplay}</option>
+                                                    <option id="placeholder" value={selectedProduct} >{currentProduct}</option>
                                                     <option value="Bologna">Bologna</option>
                                                     <option value="Chopped Ham">Chopped Ham</option>
                                                     <option value="Cotto Salami">Cotto Salami</option>
@@ -215,23 +209,24 @@ export default function InvTable() {
                                                     <option value="Potato Salad">Potato Salad</option>
                                                     <option value="Chicken Salad">Chicken Salad</option>
                                                 </select>
+                                                <br /><span className="text-center text-white"></span>
                                             </div>
                                         </div>
                                         <div className="col mx-3 pb-4">
                                             <div className="form-group">
                                                 <label className="me-2">Date Received:</label>
-                                                <input key={`receive${itemId}`} type="date" id="receiveSelect" defaultValue={defaultReceive} onChange={(e) => setSelectedReceive(e.target.value)} disabled={isDisabled} />
+                                                <input key={`receive${itemId}`} type="date" id="receiveSelect" value={selectedReceive} onChange={(e) => setSelectedReceive(e.target.value)} disabled={isDisabled} />
                                             </div>
                                         </div>
                                         <div className="col mx-3 pb-4">
                                             <div className="form-group">
                                                 <label className="me-2">Expiration Date:</label>
-                                                <input key={`expire${itemId}`} type="date" id="expireSelect" defaultValue={defaultExpire} onChange={(e) => setSelectedExpire(e.target.value)} disabled={isDisabled} />
+                                                <input key={`expire${itemId}`} type="date" id="expireSelect" value={selectedExpire} onChange={(e) => setSelectedExpire(e.target.value)} disabled={isDisabled} />
                                             </div>
                                         </div>
                                         <div className="col mx-3 pb-4">
                                             <div className="form-group">
-                                                <UpdateBtn formData={formData} isDisabled={isDisabled} inventoryData={inventoryData} setDoUpdate={setDoUpdate} setInventoryData={setInventoryData} resetUpdater={resetUpdater} />
+                                                <UpdateBtn formData={formData} isDisabled={isDisabled} setDoUpdate={setDoUpdate} inventoryData={inventoryData} setInventoryData={setInventoryData} resetUpdater={resetUpdater} />
                                             </div>
                                         </div>
                                     </div>

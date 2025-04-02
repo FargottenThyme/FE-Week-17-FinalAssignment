@@ -12,7 +12,6 @@ type Props = {
 
 export default function TableRow({ item, setItemId, setIsDisabled, setSelectedProduct, setSelectedReceive, setSelectedExpire }: Props) {
     const onClickSelectItem = () => {
-        console.log(item)
         setItemId(item.id)
         setSelectedProduct(item.name)
         setSelectedReceive(item.receivedDate)

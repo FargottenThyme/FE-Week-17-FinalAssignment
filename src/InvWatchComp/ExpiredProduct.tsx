@@ -1,18 +1,19 @@
 import { compareDates } from "../compareDates"
-import { CInvent } from "../types"
+import { Item } from "../types"
 import { DelBtn } from "./DelBtn"
 
 type Props = {
-    cInventory: CInvent[]
-    loading: boolean
+    itemData: Item[]
+    isLoading: boolean
     selectedDate: string
 }
 
-export default function ExpiredProduct({ cInventory, loading, selectedDate }: Props) {
+export default function ExpiredProduct({ itemData, isLoading, selectedDate }: Props) {
+
     return (
         <>
-            {loading ? <h3 className="text-white text-center">Loading...</h3> :
-                cInventory.map((item: CInvent) => {
+            {isLoading ? <h3 className="text-white text-center">Loading...</h3> :
+                itemData.map((item: Item) => {
 
                     if (compareDates(item.expireDate, selectedDate)) {
 
@@ -24,7 +25,7 @@ export default function ExpiredProduct({ cInventory, loading, selectedDate }: Pr
                                 <td>$ {item.price}</td>
                                 <td>{item.receivedDate}</td>
                                 <td>{item.expireDate}</td>
-                                <td><DelBtn item={item} cInventory={cInventory} /></td>
+                                <td><DelBtn item={item} itemData={itemData} /></td>
                             </tr>
                         )
                     }
