@@ -1,20 +1,20 @@
-import { Item } from "../types"
+import { Inventory, Item } from "../types"
 
 
 type Props = {
     item: Item
-    itemData: Item[]
+    inventoryData: Inventory[]
+    setInventoryData: (newValue: Inventory[]) => void
 }
 
-export function DelBtn({ item, itemData }: Props) {
+export function DelBtn({ item, inventoryData, setInventoryData }: Props) {
     const onClickDelete = async () => {
         const response = await fetch("http://localhost:3000/inventory/" + item.id, {
             method: "DELETE"
         })
-        const temp = [...itemData]
-        const id = temp.indexOf(item)
-        temp.splice(id, 1)
-        console.log(temp)
+        const temp = [...inventoryData]
+        temp.splice(item.id, 1)
+        setInventoryData(temp)
 
     }
 

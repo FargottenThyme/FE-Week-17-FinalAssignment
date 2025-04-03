@@ -118,7 +118,7 @@ export default function InvWatchlist() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <WatchList itemData={itemData} isLoading={isLoading} selectedDate={selectedDate} />
+                                        <WatchList itemData={itemData} isLoading={isLoading} selectedDate={selectedDate} inventoryData={inventoryData} setInventoryData={setInventoryData} />
                                     </tbody>
                                 </table>
                                 <br />
@@ -139,7 +139,7 @@ export default function InvWatchlist() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <ExpiredProduct itemData={itemData} isLoading={isLoading} selectedDate={selectedDate} />
+                                        <ExpiredProduct itemData={itemData} isLoading={isLoading} selectedDate={selectedDate} inventoryData={inventoryData} setInventoryData={setInventoryData} />
                                     </tbody>
                                 </table>
                             </>

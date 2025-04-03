@@ -1,14 +1,16 @@
 import { compareDates } from "../compareDates"
-import { Item } from "../types"
+import { Inventory, Item } from "../types"
 import { DelBtn } from "./DelBtn"
 
 type Props = {
     itemData: Item[]
     isLoading: boolean
     selectedDate: string
+        inventoryData: Inventory[]
+        setInventoryData: (newValue: Inventory[]) => void
 }
 
-export default function WatchList({ itemData, isLoading, selectedDate }: Props) {
+export default function WatchList({ itemData, isLoading, selectedDate, inventoryData, setInventoryData }: Props) {
     return (
         <>
             {isLoading ? <h3 className="text-white text-center">Loading...</h3> : 
@@ -23,7 +25,7 @@ export default function WatchList({ itemData, isLoading, selectedDate }: Props) 
                             <td>$ {item.price}</td>
                             <td>{item.receivedDate}</td>
                             <td>{item.expireDate}</td>
-                            <td><DelBtn item={item} itemData={itemData} /></td>
+                            <td><DelBtn item={item} inventoryData={inventoryData} setInventoryData={setInventoryData} /></td>
                         </tr>
                     )}
                 })}
